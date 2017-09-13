@@ -24,3 +24,7 @@ class FileContext:
     @cached_property
     def relative_path(self):
         return self.path[len(self.context.files_common_prefix):]
+
+    @cached_property
+    def is_migration(self):
+        return os.path.dirname(self.path).endswith('migrations')

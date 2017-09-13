@@ -18,6 +18,9 @@ def cli(args=None):
     for filename in context.files:
         file_context = FileContext(context, filename)
         for check_cls in check_classes:
+            if file_context.is_migration and not check_cls.run_on_migrations:
+                continue
+
             errors = check_cls(file_context).check()
             if errors is None:
                 continue

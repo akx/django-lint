@@ -3,6 +3,7 @@ from django_lint.errors import Error
 
 class Check:
     id = None
+    run_on_migrations = False
 
     def __init__(self, file_context):
         """

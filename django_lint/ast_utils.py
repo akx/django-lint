@@ -1,3 +1,4 @@
+from astroid import ClassDef, Assign, Call
 from astroid.node_classes import NodeNG
 
 
@@ -31,3 +32,21 @@ def find(root, *, type=None, attrs={}, depth=10000):
             yield child
         if depth > 0:
             yield from find(child, type=type, attrs=attrs, depth=(depth - 1))
+
+
+def is_model_definition(cdef: ClassDef):
+    # TODO: Could be improved, probably :)
+    return any(base._repr_name().endswith('Model') for base in cdef.bases)
+
+
+def find_all_model_fields(ast):
+    for cdef in find(ast, type=ClassDef):  # Find all class definitions
+        if not is_model_definition(cdef):  # If the class does not smell like a model, never mind
+            continue
+        # Find all assignments whose rvalue is a call
+        for assign in find(cdef, type=Assign, attrs={'value': lambda n, v: isinstance(v, Call)}):
+            yield (cdef, assign)
+
+
+def get_call_kwargs(call):
+    return {kw.arg for kw in (call.keywords or ())}
