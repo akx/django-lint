@@ -23,3 +23,7 @@ class Check:
             code=code,
             node=node,
         )
+
+    @property
+    def context(self):
+        return self.file_context.context

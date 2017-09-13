@@ -21,7 +21,7 @@ class RelatedFieldExplicitOnDeleteCheck(Check):
     id = 'related-field-explicit-on-delete'
 
     def check(self):
-        for cdef, assign in find_all_model_fields(self.file_context.ast):
+        for cdef, assign in find_all_model_fields(self.context, self.file_context.ast):
             if not smells_like_related_field(assign.value):
                 continue
             if 'on_delete' not in get_call_kwargs(assign.value):
@@ -39,7 +39,7 @@ class RelatedFieldExplicitRelatedNameCheck(Check):
     id = 'related-field-explicit-related-name'
 
     def check(self):
-        for cdef, assign in find_all_model_fields(self.file_context.ast):
+        for cdef, assign in find_all_model_fields(self.context, self.file_context.ast):
             if not smells_like_related_field(assign.value):
                 continue
             if 'related_name' not in get_call_kwargs(assign.value):

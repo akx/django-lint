@@ -1,5 +1,8 @@
 from astroid import ClassDef, Assign, Call
+from astroid.helpers import safe_infer
 from astroid.node_classes import NodeNG
+
+from django_lint.contexts import Context
 
 
 def _check_attr(obj, key, expected):
@@ -34,14 +37,23 @@ def find(root, *, type=None, attrs={}, depth=10000):
             yield from find(child, type=type, attrs=attrs, depth=(depth - 1))
 
 
-def is_model_definition(cdef: ClassDef):
-    # TODO: Could be improved, probably :)
-    return any(base._repr_name().endswith('Model') for base in cdef.bases)
+def is_model_definition(context: Context, cdef: ClassDef):
+    # Fast path: look at classes that smell like models
+    if any(base._repr_name().endswith('Model') for base in cdef.bases):
+        return True
+
+    # Slower path: run inference and look at ancestor classes
+    if not context.fast:
+        if any(anc.qname() == 'django.db.models.base.Model' for anc in safe_infer(cdef).ancestors()):
+            return True
+
+    # Probably not a model then
+    return False
 
 
-def find_all_model_fields(ast):
+def find_all_model_fields(context: Context, ast: NodeNG):
     for cdef in find(ast, type=ClassDef):  # Find all class definitions
-        if not is_model_definition(cdef):  # If the class does not smell like a model, never mind
+        if not is_model_definition(context, cdef):  # If the class does not smell like a model, never mind
             continue
         # Find all assignments whose rvalue is a call
         for assign in find(cdef, type=Assign, attrs={'value': lambda n, v: isinstance(v, Call)}):

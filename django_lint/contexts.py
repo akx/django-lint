@@ -4,8 +4,9 @@ from astroid import MANAGER as astroid_manager
 
 
 class Context:
-    def __init__(self, files):
+    def __init__(self, files, fast=False):
         self.files = files
+        self.fast = bool(fast)
 
     @cached_property
     def files_common_prefix(self):
