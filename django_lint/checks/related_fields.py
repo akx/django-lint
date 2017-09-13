@@ -19,6 +19,10 @@ def smells_like_related_field(node):
 
 class RelatedFieldExplicitOnDeleteCheck(Check):
     id = 'related-field-explicit-on-delete'
+    description = """
+    Check that all RelatedFields (ForeignKeys, ManyToManyFields and OneToOneFields) have
+    an explicit `on_delete` clause.
+    """
 
     def check(self):
         for cdef, assign in find_all_model_fields(self.context, self.file_context.ast):
@@ -37,6 +41,10 @@ class RelatedFieldExplicitOnDeleteCheck(Check):
 
 class RelatedFieldExplicitRelatedNameCheck(Check):
     id = 'related-field-explicit-related-name'
+    description = """
+    Check that all RelatedFields (ForeignKeys, ManyToManyFields and OneToOneFields) have
+    an explicit `related_name`.
+    """
 
     def check(self):
         for cdef, assign in find_all_model_fields(self.context, self.file_context.ast):
