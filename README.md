@@ -5,6 +5,8 @@ Statically analyze Django projects for common problems.
 
 ## Checkers
 
+### `model-explicit-str`
+Check that all Models have __str__.
 ### `related-field-explicit-on-delete`
 
 Check that all RelatedFields (ForeignKeys, ManyToManyFields and OneToOneFields) have
