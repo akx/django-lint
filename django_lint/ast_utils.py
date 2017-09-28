@@ -51,10 +51,15 @@ def is_model_definition(context: Context, cdef: ClassDef):
     return False
 
 
-def find_all_model_fields(context: Context, ast: NodeNG):
+def find_all_model_definitions(context: Context, ast: NodeNG):
     for cdef in find(ast, type=ClassDef):  # Find all class definitions
         if not is_model_definition(context, cdef):  # If the class does not smell like a model, never mind
             continue
+        yield cdef
+
+
+def find_all_model_fields(context: Context, ast: NodeNG):
+    for cdef in find_all_model_definitions(context, ast):
         # Find all assignments whose rvalue is a call
         for assign in find(cdef, type=Assign, attrs={'value': lambda n, v: isinstance(v, Call)}):
             yield (cdef, assign)
