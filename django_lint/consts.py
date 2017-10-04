@@ -1,0 +1,3 @@
+KNOWN_ACRONYMS = {
+    'URL',
+}
