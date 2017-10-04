@@ -14,4 +14,13 @@ def import_builtin_check_modules():
 
 def get_check_classes():
     import_builtin_check_modules()
-    return {c for c in Check.__subclasses__() if c.id}
+    check_classes = set()
+
+    def walk(cls):
+        if cls.id:
+            check_classes.add(cls)
+        for cls in cls.__subclasses__():
+            walk(cls)
+
+    walk(Check)
+    return check_classes

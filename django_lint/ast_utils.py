@@ -67,3 +67,19 @@ def find_all_model_fields(context: Context, ast: NodeNG):
 
 def get_call_kwargs(call):
     return {kw.arg: kw.value for kw in (call.keywords or ())}
+
+
+def get_model_meta(cdef: ClassDef):
+    try:
+        return next(find(cdef, type=ClassDef, attrs={'name': 'Meta'}))
+    except StopIteration:
+        return None
+
+
+def get_model_meta_assignments(cdef: ClassDef):
+    meta = get_model_meta(cdef)
+    assignments = {}
+    if meta:
+        for assign in find(meta, type=Assign):
+            assignments[assign.targets[0].name] = assign.value
+    return assignments
