@@ -10,8 +10,8 @@ from io import StringIO
 def generate_readme_fragment():
     out_io = StringIO()
     for check_class in sorted(get_check_classes(), key=attrgetter('id')):
-        out_io.write('### `{id}`\n'.format(id=check_class.id))
-        out_io.write('{description}\n'.format(description=dedent(check_class.description)))
+        out_io.write('### `{id}`\n\n'.format(id=check_class.id))
+        out_io.write('{description}\n\n'.format(description=dedent(check_class.description).strip()))
     return out_io.getvalue()
 
 
