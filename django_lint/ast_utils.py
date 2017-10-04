@@ -66,4 +66,4 @@ def find_all_model_fields(context: Context, ast: NodeNG):
 
 
 def get_call_kwargs(call):
-    return {kw.arg for kw in (call.keywords or ())}
+    return {kw.arg: kw.value for kw in (call.keywords or ())}
