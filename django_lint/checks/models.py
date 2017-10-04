@@ -10,6 +10,8 @@ class ModelExplicitStr(Check):
 
     def check(self):
         for cdef in find_all_model_definitions(self.context, self.file_context.ast):
+            if cdef.name.lower().endswith('mixin'):
+                continue
             # TODO: Tbh, this should check the entire class hierarchy
             func_names = {fdef.name for fdef in find(cdef, type=FunctionDef, depth=1)}
             if '__str__' not in func_names:
