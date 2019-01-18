@@ -1,3 +1,5 @@
+import re
+
 from astroid import ClassDef, Assign, Call
 from astroid.helpers import safe_infer
 from astroid.node_classes import NodeNG
@@ -37,18 +39,44 @@ def find(root, *, type=None, attrs={}, depth=10000):
             yield from find(child, type=type, attrs=attrs, depth=(depth - 1))
 
 
-def is_model_definition(context: Context, cdef: ClassDef):
-    # Fast path: look at classes that smell like models
-    if any(base._repr_name().endswith('Model') for base in cdef.bases):
-        return True
+def as_re_pattern(regexp, flags=0):
+    if isinstance(regexp, re.Pattern):
+        return regexp
+    return re.compile(regexp, flags=flags)
 
-    # Slower path: run inference and look at ancestor classes
-    if not context.fast:
-        if any(anc.qname() == 'django.db.models.base.Model' for anc in safe_infer(cdef).ancestors()):
+
+def get_classdef_inheritance_checker(
+    fast_base_regexps=(),
+    slow_base_qname_regexps=(),
+):
+    fast_base_regexps = [as_re_pattern(re) for re in fast_base_regexps]
+    slow_base_qname_regexps = [as_re_pattern(re) for re in slow_base_qname_regexps]
+
+    def check_classdef(context: Context, cdef: ClassDef):
+        # Fast path: look at classes that smell like models
+        if fast_base_regexps and any(
+            any(r.search(base._repr_name()) for r in fast_base_regexps)
+                for base in cdef.bases
+        ):
             return True
 
-    # Probably not a model then
-    return False
+        # Slower path: run inference and look at ancestor classes
+        if not context.fast:
+            if slow_base_qname_regexps and any(
+                any(r.search(anc.qname()) for r in slow_base_qname_regexps)
+                    for anc in safe_infer(cdef).ancestors()
+            ):
+                return True
+
+        return False
+
+    return check_classdef
+
+
+is_model_definition = get_classdef_inheritance_checker(
+    fast_base_regexps=(r'Model$',),
+    slow_base_qname_regexps=(re.escape('django.db.models.base.Model'),),
+)
 
 
 def find_all_model_definitions(context: Context, ast: NodeNG):
