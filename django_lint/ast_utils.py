@@ -78,6 +78,11 @@ is_model_definition = get_classdef_inheritance_checker(
     slow_base_qname_regexps=(re.escape('django.db.models.base.Model'),),
 )
 
+is_admin_definition = get_classdef_inheritance_checker(
+    fast_base_regexps=(r'Admin$',),
+    slow_base_qname_regexps=(re.escape('django.contrib.admin.options.ModelAdmin'),),
+)
+
 
 def find_all_model_definitions(context: Context, ast: NodeNG):
     for cdef in find(ast, type=ClassDef):  # Find all class definitions
@@ -111,3 +116,10 @@ def get_model_meta_assignments(cdef: ClassDef):
         for assign in find(meta, type=Assign):
             assignments[assign.targets[0].name] = assign.value
     return assignments
+
+
+def get_classdef_field_names(cdef: ClassDef):
+    for assign in find(cdef, type=Assign):
+        for target in assign.targets:
+            if hasattr(target, 'name'):
+                yield target.name

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from django_lint.errors import Error
 
 
@@ -15,7 +17,9 @@ class Check:
     def check(self):
         raise NotImplementedError('{cls} must implement check()'.format(cls=self.__class__.__name__))
 
-    def make_error(self, message, params, *, code=None, node=None):
+    def make_error(self, message, params: Optional[dict] = None, *, code=None, node=None):
+        if params is None:
+            params = {}
         return Error(
             check=self,
             file_context=self.file_context,
