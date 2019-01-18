@@ -5,6 +5,10 @@ Statically analyze Django projects for common problems.
 
 ## Checkers
 
+### `admin-search-fields`
+
+Check that admin classes define search_fields
+
 ### `field-verbose-name-capitalization`
 
 Check that field verbose_names are not capitalized
