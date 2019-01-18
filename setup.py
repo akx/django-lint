@@ -19,7 +19,7 @@ if __name__ == '__main__':
         maintainer='Aarni Koskela',
         maintainer_email='akx@iki.fi',
         license='MIT',
-        install_requires=['astroid~=1.5.0'],
+        install_requires=['astroid~=2.1.0'],
         extras_require={'dev': dev_dependencies},
         packages=setuptools.find_packages('.', include=('django_lint*',)),
         entry_points={'console_scripts': ['django-lint=django_lint.cli:cli']},
