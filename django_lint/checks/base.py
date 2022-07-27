@@ -15,9 +15,13 @@ class Check:
         self.file_context = file_context
 
     def check(self):
-        raise NotImplementedError('{cls} must implement check()'.format(cls=self.__class__.__name__))
+        raise NotImplementedError(
+            "{cls} must implement check()".format(cls=self.__class__.__name__)
+        )
 
-    def make_error(self, message, params: Optional[dict] = None, *, code=None, node=None):
+    def make_error(
+        self, message, params: Optional[dict] = None, *, code=None, node=None
+    ):
         if params is None:
             params = {}
         return Error(

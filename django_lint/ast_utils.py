@@ -1,6 +1,6 @@
 import re
 
-from astroid import ClassDef, Assign, Call
+from astroid import Assign, Call, ClassDef
 from astroid.helpers import safe_infer
 from astroid.node_classes import NodeNG
 
@@ -56,7 +56,7 @@ def get_classdef_inheritance_checker(
         # Fast path: look at classes that smell like models
         if fast_base_regexps and any(
             any(r.search(base._repr_name()) for r in fast_base_regexps)
-                for base in cdef.bases
+            for base in cdef.bases
         ):
             return True
 
@@ -64,7 +64,7 @@ def get_classdef_inheritance_checker(
         if not context.fast:
             if slow_base_qname_regexps and any(
                 any(r.search(anc.qname()) for r in slow_base_qname_regexps)
-                    for anc in safe_infer(cdef).ancestors()
+                for anc in safe_infer(cdef).ancestors()
             ):
                 return True
 
@@ -74,19 +74,21 @@ def get_classdef_inheritance_checker(
 
 
 is_model_definition = get_classdef_inheritance_checker(
-    fast_base_regexps=(r'Model$',),
-    slow_base_qname_regexps=(re.escape('django.db.models.base.Model'),),
+    fast_base_regexps=(r"Model$",),
+    slow_base_qname_regexps=(re.escape("django.db.models.base.Model"),),
 )
 
 is_admin_definition = get_classdef_inheritance_checker(
-    fast_base_regexps=(r'Admin$',),
-    slow_base_qname_regexps=(re.escape('django.contrib.admin.options.ModelAdmin'),),
+    fast_base_regexps=(r"Admin$",),
+    slow_base_qname_regexps=(re.escape("django.contrib.admin.options.ModelAdmin"),),
 )
 
 
 def find_all_model_definitions(context: Context, ast: NodeNG):
     for cdef in find(ast, type=ClassDef):  # Find all class definitions
-        if not is_model_definition(context, cdef):  # If the class does not smell like a model, never mind
+        if not is_model_definition(
+            context, cdef
+        ):  # If the class does not smell like a model, never mind
             continue
         yield cdef
 
@@ -94,7 +96,9 @@ def find_all_model_definitions(context: Context, ast: NodeNG):
 def find_all_model_fields(context: Context, ast: NodeNG):
     for cdef in find_all_model_definitions(context, ast):
         # Find all assignments whose rvalue is a call
-        for assign in find(cdef, type=Assign, attrs={'value': lambda n, v: isinstance(v, Call)}):
+        for assign in find(
+            cdef, type=Assign, attrs={"value": lambda n, v: isinstance(v, Call)}
+        ):
             yield (cdef, assign)
 
 
@@ -104,7 +108,7 @@ def get_call_kwargs(call):
 
 def get_model_meta(cdef: ClassDef):
     try:
-        return next(find(cdef, type=ClassDef, attrs={'name': 'Meta'}))
+        return next(find(cdef, type=ClassDef, attrs={"name": "Meta"}))
     except StopIteration:
         return None
 
@@ -121,5 +125,5 @@ def get_model_meta_assignments(cdef: ClassDef):
 def get_classdef_field_names(cdef: ClassDef):
     for assign in find(cdef, type=Assign):
         for target in assign.targets:
-            if hasattr(target, 'name'):
+            if hasattr(target, "name"):
                 yield target.name

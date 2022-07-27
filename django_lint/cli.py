@@ -1,6 +1,6 @@
 import argparse
-import sys
 import os
+import sys
 
 import astroid
 
@@ -9,14 +9,22 @@ from django_lint.contexts import Context, FileContext
 from django_lint.files import collect_files
 
 parser = argparse.ArgumentParser()
-parser.add_argument('target', nargs='*')
-parser.add_argument('--list-checks', '-l', action='store_true', help='list checks, then exit')
-parser.add_argument('--disable', '-d', action='append', help='disable these checks')
-parser.add_argument('--only', action='append', help='enable only these checks')
-parser.add_argument('--fast', action='store_true', help='tell checks to try and be faster (though less accurate)')
+parser.add_argument("target", nargs="*")
 parser.add_argument(
-    '--prepend-to-path', '-p', action='append',
-    help='prepend this to `sys.path` – allows analysis to find libraries that might be in other venvs'
+    "--list-checks", "-l", action="store_true", help="list checks, then exit"
+)
+parser.add_argument("--disable", "-d", action="append", help="disable these checks")
+parser.add_argument("--only", action="append", help="enable only these checks")
+parser.add_argument(
+    "--fast",
+    action="store_true",
+    help="tell checks to try and be faster (though less accurate)",
+)
+parser.add_argument(
+    "--prepend-to-path",
+    "-p",
+    action="append",
+    help="prepend this to `sys.path` – allows analysis to find libraries that might be in other venvs",
 )
 
 
@@ -35,8 +43,8 @@ def check_file(context, filename, check_classes):
 
 def is_check_enabled(cls, only, disable):
     if only:
-        return (cls.id in only)
-    return (cls.id not in (disable or ()))
+        return cls.id in only
+    return cls.id not in (disable or ())
 
 
 def cli(args=None):
@@ -47,15 +55,21 @@ def cli(args=None):
         return
 
     prepend_to_path = list(args.prepend_to_path or ())
-    assert all(os.path.isdir(d) for d in prepend_to_path), 'all prepend-to-path entries must be directories'
+    assert all(
+        os.path.isdir(d) for d in prepend_to_path
+    ), "all prepend-to-path entries must be directories"
     sys.path[:] = list(prepend_to_path) + sys.path
 
-    files = set(f for f in collect_files(targets=args.target) if f.endswith('.py'))
+    files = set(f for f in collect_files(targets=args.target) if f.endswith(".py"))
     context = Context(files=sorted(files), fast=args.fast)
-    check_classes = {c for c in get_check_classes() if is_check_enabled(c, only=args.only, disable=args.disable)}
+    check_classes = {
+        c
+        for c in get_check_classes()
+        if is_check_enabled(c, only=args.only, disable=args.disable)
+    }
 
     for filename in context.files:
         try:
             check_file(context, filename, check_classes)
         except astroid.exceptions.AstroidSyntaxError as ase:
-            print('Unable to parse %s: %s' % (filename, ase), file=sys.stderr)
+            print("Unable to parse %s: %s" % (filename, ase), file=sys.stderr)

@@ -1,6 +1,7 @@
 import os
-from lazy_object_proxy.utils import cached_property
+
 from astroid import MANAGER as astroid_manager
+from lazy_object_proxy.utils import cached_property
 
 
 class Context:
@@ -24,8 +25,8 @@ class FileContext:
 
     @cached_property
     def relative_path(self):
-        return self.path[len(self.context.files_common_prefix):]
+        return self.path[len(self.context.files_common_prefix) :]
 
     @cached_property
     def is_migration(self):
-        return os.path.dirname(self.path).endswith('migrations')
+        return os.path.dirname(self.path).endswith("migrations")

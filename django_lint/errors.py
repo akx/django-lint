@@ -25,7 +25,7 @@ class Error(object):
         self.check = check
         self.file_context = file_context
         self.message = str(message)
-        self.params = (params or {})
+        self.params = params or {}
         self.code = code
         self.node = node
 
@@ -37,18 +37,18 @@ class Error(object):
     def full_code(self):
         code = self.check.id
         if self.code:
-            code += ':%s' % self.code
+            code += ":%s" % self.code
         return code
 
     @property
     def location(self):
         location = self.file_context.relative_path
         if self.node:
-            location += ':%s' % self.node.lineno
+            location += ":%s" % self.node.lineno
         return location
 
     def __str__(self):
-        return '{location} - {full_code}: {message}'.format(
+        return "{location} - {full_code}: {message}".format(
             location=self.location,
             full_code=self.full_code,
             message=self.formatted_message,
